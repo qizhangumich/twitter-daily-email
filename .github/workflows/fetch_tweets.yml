@@ -33,6 +33,12 @@ jobs:
           RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}
         run: echo "✅ 环境变量已加载"
 
+      - name: 🔍 Echo 测试 API Key
+        run: echo "TIKHUB_API_KEY=${{ secrets.TIKHUB_API_KEY }}"
+      
+      - name: 🔧 强制注入 API Key 到环境变量
+        run: echo "TIKHUB_API_KEY=${{ secrets.TIKHUB_API_KEY }}" >> $GITHUB_ENV
+
       - name: 🛠️ 打印环境变量（Debug）
         run: env | grep "TIKHUB_API_KEY"
 
