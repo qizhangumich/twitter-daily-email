@@ -18,7 +18,8 @@ SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 RECIPIENT_EMAILS = os.getenv("RECIPIENT_EMAILS", "").split(",")
 
-print(f"TIKHUB_API_KEY 长度: {len(TIKHUB_API_KEY) if TIKHUB_API_KEY else '未找到 API Key'}")
+# 🔍 Debug: 打印 API Key 长度
+print(f"TIKHUB_API_KEY 获取结果: {'存在' if TIKHUB_API_KEY else '未找到'}，长度: {len(TIKHUB_API_KEY) if TIKHUB_API_KEY else 'None'}")
 
 # 🔥 测试 API Key 是否正确传递
 if not TIKHUB_API_KEY:
@@ -34,6 +35,9 @@ response = requests.get(API_URL, headers=headers, params=params)
 print(f"🔍 API 响应状态码: {response.status_code}")
 print(f"🔍 API 返回数据: {response.text}")
 
+if response.status_code == 401:
+    print("❌ API Key 无效，请检查密钥是否正确！")
+    exit(1)
 
 # **📌 Twitter API 配置**
 API_URL = "https://api.tikhub.io/api/v1/twitter/web/fetch_user_post_tweet"
