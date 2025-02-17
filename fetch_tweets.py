@@ -9,10 +9,11 @@ from email.mime.multipart import MIMEMultipart
 # **📌 读取环境变量**
 TIKHUB_API_KEY = os.getenv("TIKHUB_API_KEY")
 SMTP_SERVER = os.getenv("SMTP_SERVER")
-SMTP_PORT = int(os.getenv("SMTP_PORT"))
+#SMTP_PORT = int(os.getenv("SMTP_PORT"))
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 RECIPIENT_EMAILS = os.getenv("RECIPIENT_EMAILS").split(",")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))  # 默认 465 端口
 
 # **📌 Twitter API 配置**
 API_URL = "https://api.tikhub.io/api/v1/twitter/web/fetch_user_post_tweet"
