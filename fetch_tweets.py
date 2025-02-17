@@ -1,14 +1,30 @@
+import os
 import requests
 import datetime
 from dateutil import parser
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from config import SMTP_SERVER, SMTP_PORT, SENDER_EMAIL, SENDER_PASSWORD, RECIPIENT_EMAILS, TIKHUB_API_KEY, TWITTER_USERS
 
+# **📌 读取环境变量**
+TIKHUB_API_KEY = os.getenv("TIKHUB_API_KEY")
+SMTP_SERVER = os.getenv("SMTP_SERVER")
+SMTP_PORT = int(os.getenv("SMTP_PORT"))
+SENDER_EMAIL = os.getenv("SENDER_EMAIL")
+SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
+RECIPIENT_EMAILS = os.getenv("RECIPIENT_EMAILS").split(",")
+
+# **📌 Twitter API 配置**
 API_URL = "https://api.tikhub.io/api/v1/twitter/web/fetch_user_post_tweet"
 
-# **📌 获取推文数据**
+# **📌 目标 Twitter 账号**
+TWITTER_USERS = {
+    "44196397": "Elon Musk",
+    "1367531": "Fox News",
+    "1652541": "Reuters"
+}
+
+# **📌 获取推文**
 def get_latest_tweets(user_id):
     headers = {"Authorization": f"Bearer {TIKHUB_API_KEY}"}
     params = {"rest_id": user_id}
@@ -20,28 +36,13 @@ def get_latest_tweets(user_id):
 
     data = response.json()
     tweets_data = data.get("data", {})
-
-    # **📌 提取最新推文**
     timeline = tweets_data.get("timeline", [])
-    latest_tweet = timeline[0] if timeline else None
-    latest = {
-        "text": latest_tweet.get("text", "无"),
-        "created_at": format_time(latest_tweet.get("created_at"))
-    } if latest_tweet else None
 
-    return latest
-
-# **📌 格式化时间**
-def format_time(time_str):
-    if not time_str:
-        return "未知"
-    parsed_time = parser.parse(time_str)
-    return parsed_time.strftime("%Y-%m-%d %H:%M")
+    return timeline  # 直接返回推文列表
 
 # **📌 发送邮件**
 def send_email(content):
-    subject = "Twitter 最新推文"
-
+    subject = "📢 Twitter 最新推文"
     server = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT)
     server.login(SENDER_EMAIL, SENDER_PASSWORD)
 
@@ -49,7 +50,7 @@ def send_email(content):
         msg = MIMEMultipart()
         msg["From"] = SENDER_EMAIL
         msg["To"] = recipient
-        msg["Subject"] = subject   
+        msg["Subject"] = subject
         msg.attach(MIMEText(content, "plain"))
 
         server.sendmail(SENDER_EMAIL, recipient, msg.as_string())
@@ -60,12 +61,13 @@ def send_email(content):
 # **📌 运行主函数**
 if __name__ == "__main__":
     email_content = ""
-
     for user_id, user_name in TWITTER_USERS.items():
-        tweet = get_latest_tweets(user_id)
-        if tweet:
+        tweets = get_latest_tweets(user_id)
+        if tweets:
             email_content += f"----- {user_name} -----\n"
-            email_content += f"🆕 最新推文:\n{tweet['text']}\n🕒 发布时间: {tweet['created_at']}\n\n"
+            for tweet in tweets:
+                tweet_time = parser.parse(tweet["created_at"]).strftime("%Y-%m-%d %H:%M")
+                email_content += f"🆕 {tweet['text']}\n🕒 {tweet_time}\n\n"
 
     print(email_content)  # 打印到控制台
     send_email(email_content)  # 发送邮件
