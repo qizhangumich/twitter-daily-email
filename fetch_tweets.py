@@ -13,7 +13,7 @@ from dateutil import parser  # ✅ 确保正确导入 python-dateutil
 # **📌 读取环境变量**
 TIKHUB_API_KEY = os.getenv("TIKHUB_API_KEY")
 SMTP_SERVER = os.getenv("SMTP_SERVER")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))  # 默认 465 端口
+SMTP_PORT = 465  # 默认 465 端口
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 RECIPIENT_EMAILS = os.getenv("RECIPIENT_EMAILS", "").split(",")
