@@ -18,6 +18,23 @@ SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 RECIPIENT_EMAILS = os.getenv("RECIPIENT_EMAILS", "").split(",")
 
+print(f"TIKHUB_API_KEY 长度: {len(TIKHUB_API_KEY) if TIKHUB_API_KEY else '未找到 API Key'}")
+
+# 🔥 测试 API Key 是否正确传递
+if not TIKHUB_API_KEY:
+    print("❌ 未找到 API Key，请检查环境变量是否正确加载！")
+    exit(1)
+
+# 🔥 发送测试请求
+API_URL = "https://api.tikhub.io/api/v1/twitter/web/fetch_user_post_tweet"
+headers = {"Authorization": f"Bearer {TIKHUB_API_KEY}"}
+params = {"rest_id": "44196397"}
+
+response = requests.get(API_URL, headers=headers, params=params)
+print(f"🔍 API 响应状态码: {response.status_code}")
+print(f"🔍 API 返回数据: {response.text}")
+
+
 # **📌 Twitter API 配置**
 API_URL = "https://api.tikhub.io/api/v1/twitter/web/fetch_user_post_tweet"
 
