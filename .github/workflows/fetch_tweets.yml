@@ -33,10 +33,15 @@ jobs:
           RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}
         run: echo "✅ 环境变量已加载"
 
-      - name: 🛠️ 测试 API Key  # 👈 **新增**
-        run: echo "TIKHUB_API_KEY=${TIKHUB_API_KEY}"
+      - name: 🛠️ 打印环境变量（Debug）
+        run: env | grep "TIKHUB_API_KEY"
+
+      - name: 🚀 运行脚本（传递环境变量）
         env:
           TIKHUB_API_KEY: ${{ secrets.TIKHUB_API_KEY }}
-
-      - name: 🚀 运行脚本
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+          RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}
         run: python fetch_tweets.py
