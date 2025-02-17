@@ -1,17 +1,21 @@
+# -*- coding: utf-8 -*-
+"""
+Twitter 自动获取推文并发送邮件
+"""
+
 import os
 import requests
-import datetime
-from dateutil import parser
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from dateutil import parser  # ✅ 确保正确导入 python-dateutil
 
 # **📌 读取环境变量**
-TIKHUB_API_KEY = os.getenv("TIKHUB_API_KEY", "")
-SMTP_SERVER = os.getenv("SMTP_SERVER", "")
+TIKHUB_API_KEY = os.getenv("TIKHUB_API_KEY")
+SMTP_SERVER = os.getenv("SMTP_SERVER")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))  # 默认 465 端口
-SENDER_EMAIL = os.getenv("SENDER_EMAIL", "")
-SENDER_PASSWORD = os.getenv("SENDER_PASSWORD", "")
+SENDER_EMAIL = os.getenv("SENDER_EMAIL")
+SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 RECIPIENT_EMAILS = os.getenv("RECIPIENT_EMAILS", "").split(",")
 
 # **📌 Twitter API 配置**
@@ -35,23 +39,20 @@ def get_latest_tweets(user_id):
         return []
 
     data = response.json()
-    tweets_data = data.get("data", {})
-
-    return tweets_data.get("timeline", []) or []  # 避免返回 None
-
+    return data.get("data", {}).get("timeline", [])  # 直接返回推文列表
 
 # **📌 发送邮件**
 def send_email(content):
+    if not content.strip():
+        print("⚠️ 没有新推文，不发送邮件")
+        return
+
     subject = "📢 Twitter 最新推文"
-    
-    try:
-        server = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT)
-        server.login(SENDER_EMAIL, SENDER_PASSWORD)
+    server = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT)
+    server.login(SENDER_EMAIL, SENDER_PASSWORD)
 
-        for recipient in RECIPIENT_EMAILS:
-            if not recipient.strip():  # 避免空邮件地址
-                continue
-
+    for recipient in RECIPIENT_EMAILS:
+        if recipient.strip():
             msg = MIMEMultipart()
             msg["From"] = SENDER_EMAIL
             msg["To"] = recipient
@@ -61,10 +62,7 @@ def send_email(content):
             server.sendmail(SENDER_EMAIL, recipient, msg.as_string())
             print(f"📩 邮件已发送至 {recipient}")
 
-        server.quit()
-    except Exception as e:
-        print(f"❌ 邮件发送失败: {e}")
-
+    server.quit()
 
 # **📌 运行主函数**
 if __name__ == "__main__":
@@ -79,8 +77,4 @@ if __name__ == "__main__":
                 email_content += f"🆕 {tweet['text']}\n🕒 {tweet_time}\n\n"
 
     print(email_content)  # 打印到控制台
-    
-    if not email_content.strip():
-        print("⚠️ 没有新推文，跳过发送邮件")
-    else:
-        send_email(email_content)
+    send_email(email_content)  # 发送邮件
