@@ -8,6 +8,7 @@ on:
 jobs:
   run-script:
     runs-on: ubuntu-latest
+
     steps:
       - name: 🛠️ 检出代码
         uses: actions/checkout@v4
@@ -20,22 +21,17 @@ jobs:
       - name: 📦 安装依赖
         run: |
           python -m pip install --upgrade pip
-          pip install requests dateutil  # `python-dateutil` 可能要写成 `dateutil`
+          pip install requests python-dateutil
 
-      - name: 🔑 设置环境变量并检查加载情况
-        run: |
-          echo "🔍 载入 Secrets..."
-          echo "TIKHUB_API_KEY=${{ secrets.TIKHUB_API_KEY }}" >> $GITHUB_ENV
-          echo "SMTP_SERVER=${{ secrets.SMTP_SERVER }}" >> $GITHUB_ENV
-          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> $GITHUB_ENV
-          echo "SENDER_EMAIL=${{ secrets.SENDER_EMAIL }}" >> $GITHUB_ENV
-          echo "SENDER_PASSWORD=${{ secrets.SENDER_PASSWORD }}" >> $GITHUB_ENV
-          echo "RECIPIENT_EMAILS=${{ secrets.RECIPIENT_EMAILS }}" >> $GITHUB_ENV
-
-          # Debug: 打印环境变量（仅打印部分内容，避免泄露）
-          echo "✅ SMTP_SERVER: $SMTP_SERVER"
-          echo "✅ RECIPIENT_EMAILS: $RECIPIENT_EMAILS"
-          echo "✅ TIKHUB_API_KEY: $(echo $TIKHUB_API_KEY | cut -c1-5)****"
+      - name: 🔑 设置环境变量
+        env:
+          TIKHUB_API_KEY: ${{ secrets.TIKHUB_API_KEY }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+          RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}
+        run: echo "✅ 环境变量已加载"
 
       - name: 🚀 运行脚本
         run: python fetch_tweets.py
